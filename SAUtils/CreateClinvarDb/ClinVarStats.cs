@@ -26,26 +26,25 @@ public class ClinVarStats
     {
         foreach (IClinVarSaItem item in items)
         {
-            if (item.Id.StartsWith("RCV"))
+            if (item.Id != null && item.Id.StartsWith("RCV"))
             {
                 RcvCount++;
-                foreach (string significance in item.Significances)
-                {
-                    RcvPathogenicityCounts.Increment(significance);
-                }
+                if (item.Significances != null)
+                    foreach (string significance in item.Significances)
+                        RcvPathogenicityCounts.Increment(significance);
 
-                RcvReviewStatusCounts.Increment(ClinVarCommon.ReviewStatusStrings[item.ReviewStatus]);
-
+                if (ClinVarCommon.ReviewStatusStrings.TryGetValue(item.ReviewStatus, out var rcvStatusStr))
+                    RcvReviewStatusCounts.Increment(rcvStatusStr);
             }
             else
             {
                 VcvCount++;
-                foreach (string significance in item.Significances)
-                {
-                    VcvPathogenicityCounts.Increment(significance);
-                }
+                if (item.Significances != null)
+                    foreach (string significance in item.Significances)
+                        VcvPathogenicityCounts.Increment(significance);
 
-                VcvReviewStatusCounts.Increment(ClinVarCommon.ReviewStatusStrings[item.ReviewStatus]);
+                if (ClinVarCommon.ReviewStatusStrings.TryGetValue(item.ReviewStatus, out var vcvStatusStr))
+                    VcvReviewStatusCounts.Increment(vcvStatusStr);
             }
         }
 

@@ -275,7 +275,7 @@ namespace SAUtils.InputFileParsers.ClinVar
                 var extendedOmimIds = GetOmimIds(variant);
 
                 var reviewStatEnum = ClinVarCommon.ReviewStatus.no_assertion;
-                if (ClinVarCommon.ReviewStatusNameMapping.ContainsKey(_reviewStatus))
+                if (_reviewStatus != null && ClinVarCommon.ReviewStatusNameMapping.ContainsKey(_reviewStatus))
                     reviewStatEnum = ClinVarCommon.ReviewStatusNameMapping[_reviewStatus];
 
                 clinvarList.Add(
@@ -380,7 +380,11 @@ namespace SAUtils.InputFileParsers.ClinVar
         private const string AccessionTag            = "Acc";
         private const string VersionTag              = "Version";
         private const string ClinVarAccessionTag     = "ClinVarAccession";
-        private const string ClinicalSignificanceTag = "ClinicalSignificance";
+        private const string ClinicalSignificanceTag  = "ClinicalSignificance";
+        private const string ClassificationsTag        = "Classifications";
+        private const string GermlineClassificationTag = "GermlineClassification";
+        private const string SomaticClinicalImpactTag  = "SomaticClinicalImpact";
+        private const string OncogenicityTag           = "OncogenicityClassification";
         private const string MeasureSetTag           = "MeasureSet";
         private const string TraitSetTag             = "TraitSet";
         private const string ObservedInTag           = "ObservedIn";
@@ -394,7 +398,20 @@ namespace SAUtils.InputFileParsers.ClinVar
 		    _lastClinvarAccession = xElement.Element(ClinVarAccessionTag)?.Attribute(AccessionTag)?.Value;
             _id                   =  _lastClinvarAccession + "." + xElement.Element(ClinVarAccessionTag)?.Attribute(VersionTag)?.Value;
             
-            GetClinicalSignificance(xElement.Element(ClinicalSignificanceTag));
+            // Try old schema (ClinicalSignificance) then new schema (Classifications > GermlineClassification)
+            var clinSigElement = xElement.Element(ClinicalSignificanceTag);
+            if (clinSigElement != null)
+            {
+                GetClinicalSignificance(clinSigElement);
+            }
+            else
+            {
+                var classificationsElement = xElement.Element(ClassificationsTag);
+                if (classificationsElement != null)
+                {
+                    GetClinicalSignificanceFromClassifications(classificationsElement);
+                }
+            }
             ParseGenotypeSet(xElement.Element(GenotypeSetTag));
 		    ParseMeasureSet(xElement.Element(MeasureSetTag));
 		    ParseTraitSet(xElement.Element(TraitSetTag));
@@ -711,15 +728,35 @@ namespace SAUtils.InputFileParsers.ClinVar
 
             _significances = ClinVarCommon.GetSignificances(description, explanation);
 
-            ValidateSignificance(_significances);
+            if (_significances != null) ValidateSignificance(_significances);
+        }
+
+        private void GetClinicalSignificanceFromClassifications(XElement classificationsElement)
+        {
+            if (classificationsElement == null || classificationsElement.IsEmpty) return;
+
+            // Try GermlineClassification, SomaticClinicalImpact, OncogenicityClassification
+            foreach (var tagName in new[] { GermlineClassificationTag, SomaticClinicalImpactTag, OncogenicityTag })
+            {
+                var element = classificationsElement.Element(tagName);
+                if (element == null) continue;
+
+                _reviewStatus = element.Element(ReviewStatusTag)?.Value;
+                var description = element.Element(DescriptionTag)?.Value;
+                var explanation = element.Element(ExplanationTag)?.Value;
+
+                _significances = ClinVarCommon.GetSignificances(description, explanation);
+                if (_significances != null) ValidateSignificance(_significances);
+                return;
+            }
         }
 
         private void ValidateSignificance(string[] significances)
         {
             foreach (var significance in significances)
             {
-                if (!ClinVarCommon.ValidPathogenicity.Contains(significance)) 
-                    throw new InvalidDataException($"Invalid pathogenicity found in {_id}. Observed: {significance}");
+                if (!ClinVarCommon.ValidPathogenicity.Contains(significance))
+                    Console.WriteLine($"WARNING: Unknown pathogenicity '{significance}' in {_id}. Skipping value.");
             }
         }
 
