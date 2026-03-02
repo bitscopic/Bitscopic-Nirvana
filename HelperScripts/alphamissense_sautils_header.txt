@@ -1,0 +1,7 @@
+#title=AlphaMissense
+#assembly=GRCh37
+#matchVariantsBy=allele
+#CHROM	POS	REF	ALT	Transcript	AM_score
+#categories	.	.	.	.	Score
+#descriptions	.	.	.	.	.
+#type	.	.	.	string	number
