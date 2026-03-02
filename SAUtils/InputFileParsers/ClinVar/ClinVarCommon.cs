@@ -42,7 +42,15 @@ namespace SAUtils.InputFileParsers.ClinVar
             "variant of unknown significance",
             "conflicting data from submitters",
             "uncertain risk allele",
-            "low penetrance"
+            "low penetrance",
+            "likely oncogenic",
+            "oncogenic",
+            "tier i - strong",
+            "tier ii - potential",
+            "tier iii - unknown",
+            "tier iv - benign",
+            "vus-mid",
+            "no classification for the single variant"
         };
         public enum ReviewStatus
         {
@@ -77,7 +85,11 @@ namespace SAUtils.InputFileParsers.ClinVar
             ["criteria provided, multiple submitters, no conflicts"] = ReviewStatus.multiple_submitters_no_conflict,
             ["criteria provided, single submitter"]                  = ReviewStatus.single_submitter,
             ["no interpretation for the single variant"]  = ReviewStatus.no_interpretation_single,
-            ["no classifications from unflagged records"]            = ReviewStatus.no_assertion
+            ["no classifications from unflagged records"]            = ReviewStatus.no_assertion,
+            ["criteria provided, conflicting classifications"]      = ReviewStatus.conflicting_interpretations,
+            ["no classification provided"]                          = ReviewStatus.no_assertion,
+            ["criteria provided, multiple submitters"]              = ReviewStatus.multiple_submitters,
+            ["no classification for the single variant"]            = ReviewStatus.no_interpretation_single
         };
 
         public static readonly Dictionary<ReviewStatus, string> ReviewStatusStrings = new Dictionary<ReviewStatus, string>
