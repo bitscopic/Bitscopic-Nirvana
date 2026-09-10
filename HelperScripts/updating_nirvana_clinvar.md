@@ -114,7 +114,7 @@ The following significance values were added to `ClinVarCommon.cs`:
 
 - `likely oncogenic`, `oncogenic`
 - `tier i - strong`, `tier ii - potential`, `tier iii - unknown`, `tier iv - benign`
-- `vus-mid`
+- `vus-mid`, `vus-high`, `vus-low`
 - `no classification for the single variant`
 
 ### Files Modified
