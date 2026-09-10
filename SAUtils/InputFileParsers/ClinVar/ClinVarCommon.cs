@@ -50,6 +50,8 @@ namespace SAUtils.InputFileParsers.ClinVar
             "tier iii - unknown",
             "tier iv - benign",
             "vus-mid",
+            "vus-high",
+            "vus-low",
             "no classification for the single variant"
         };
         public enum ReviewStatus
